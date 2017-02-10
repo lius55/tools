@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="initial-scale=1.0,user-scalable=no">
+<meta http-equiv="Conent-Type" content="text/html; charset=UTF-8">
+<title>
+Yahoo Map Test
+</title>
+</head>
+<body>
+
+<div id="map" style="width:400px; height:300px"></div>
+
+<script type="text/javascript" charset="utf-8" src="https://map.yahooapis.jp/js/V1/jsapi?appid=dj0zaiZpPUhvZkxuMlNYMkxjZSZzPWNvbnN1bWVyc2VjcmV0Jng9YmE-"></script>
+<script type="text/javascript">
+window.onload = function(){
+    var ymap = new Y.Map("map",{
+	    configure : {
+	        doubleClickZoom : true,
+	        scrollWheelZoom : true,
+	        singleClickPan : true,
+	        dragging : true
+	    }
+	});
+    
+    ymap.drawMap(new Y.LatLng(35.66572, 139.73100), 17, Y.LayerSetId.NORMAL);
+
+    // 地図にアイコン表示
+	var icon = new Y.Icon('https://s.yimg.jp/images/map/yy/images/icon/yy_aicon_06_32pix.gif');
+	var marker = new Y.Marker(new Y.LatLng(35.66572, 139.73100), {icon: icon});
+	ymap.addFeature(marker);
+	marker = new Y.Marker(new Y.LatLng(35.720665, 139.73100), {icon: icon});
+	ymap.addFeature(marker);
+	marker = new Y.Marker(new Y.LatLng(35.720665, 139.776045), {icon: icon});
+	ymap.addFeature(marker);
+	
+	var scaleControl = new Y.ScaleControl();
+	ymap.addControl(scaleControl);
+	var zoomControl = new Y.SliderZoomControlVertical();
+	ymap.addControl(zoomControl);
+
+	// クリックイベント処理
+	ymap.bind('click', function(latlng){
+    	var marker = new Y.Marker(latlng, {icon: icon});
+		ymap.addFeature(marker);
+	});
+	
+}
+</script>
+
+</body>
+</html>

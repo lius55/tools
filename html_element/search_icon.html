@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Conent-Type" content="text/html; charset=UTF-8">
+<title>Search Icon</title>
+<style type="text/css">
+
+*{
+	box-sizing: border-box;
+}
+
+.button {
+	display: inline-block;
+	font-family: "Montserrat", "Trebuchet MS", Helvetica, sans-serif;
+	-webkit-font-smoothing: antialiased;
+	position: relative;
+	padding: .8em 1.4em;
+	padding-right: 4.7em;
+	background: #009ED8;
+	border: none;
+	color: white;
+	transition: .2s;
+}
+
+.button:before,
+.button:after {
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	right: 0;
+	padding-top: inherit;
+	padding-bottom: inherit;
+	width: 2.8em;
+	content: "\00a0";
+	font-family: 'FontAwesome', sans-serif;
+	font-size: 1.2em;
+	text-align: center;
+	transition: .2s;
+	transform-origin: 50% 60%;
+}
+
+.button:before {
+	background: rgba(0, 0, 0, 0.1);
+}
+
+.button:hover {
+	background: #0079a5;
+}
+
+.button:active,
+.button:focus {
+	background: #FFFFFF;
+	outline: none;
+}
+
+.button {
+	min-width: 15em;
+}
+
+.search:after {
+	content: "\f002";
+}
+
+.search:hover:after {
+	-webkit-animation: none;
+	-webkit-transform: scale(1.4);
+	animation: none;
+	transform: scale(1.4);
+}
+
+.search_form {
+	line-height: 45px;
+}
+
+.search_form input {
+	width: 80%;
+	height: 40px;
+}
+
+.search_form .icon {
+	height: 100%;
+	width: 40px;
+}
+
+.search_form .icon:after {
+	font-family: 'FontAwesome', sans-serif;
+	font-size: 1.2em;
+	content: "\f002";
+	padding-top: inherit;
+}
+
+.search_button {
+
+}
+
+.sb-search.sb-search-open, .no-js .sb-search {
+    width: 100%;
+}
+
+.sb-search {
+    position: relative;
+    margin-top: 10px;
+    width: 0%;
+    min-width: 60px;
+    height: 60px;
+    float: right;
+    overflow: hidden;
+    -webkit-transition: width 0.3s;
+    -moz-transition: width 0.3s;
+    transition: width 0.3s;
+    -webkit-backface-visibility: hidden;
+}
+
+form {
+    display: block;
+    margin-top: 0em;
+}
+
+.sb-search-input {
+    position: absolute;
+    top: 0;
+    right: 0;
+    border: none;
+    outline: none;
+    background: #fff;
+    width: 100%;
+    height: 60px;
+    margin: 0;
+    z-index: 10;
+    padding: 20px 65px 20px 20px;
+    font-family: inherit;
+    font-size: 20px;
+    color: #2c3e50;
+}
+
+.sb-icon-search {
+    color: #fff;
+    background: #e67e22;
+    z-index: 90;
+    font-size: 22px;
+    font-family: 'icomoon';
+    speak: none;
+    font-style: normal;
+    font-weight: normal;
+    font-variant: normal;
+    text-transform: none;
+    -webkit-font-smoothing: antialiased;
+}
+
+.sb-icon-search, .sb-search-submit {
+    width: 60px;
+    height: 60px;
+    display: block;
+    position: absolute;
+    right: 0;
+    top: 0;
+    padding: 0;
+    margin: 0;
+    line-height: 60px;
+    text-align: center;
+    cursor: pointer;
+}
+
+.sb-icon-search:before {
+	font-family: 'FontAwesome', sans-serif;
+    //content: "\e000";
+    content: "\f002";
+}
+</style>
+</head>
+<body>
+
+<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+<link href='http://fonts.googleapis.com/css?family=Droid+Serif:400,700' rel='stylesheet' type='text/css'>
+<button class="button search">Search</button><br/>
+<div class="button search">&nbsp;</div><br/>
+
+<div class="search_form">
+<input type="text"/>
+<span class="icon">&nbsp;</span>
+</div>
+
+<div id="sb-search" class="sb-search sb-search-open">
+						<form>
+							<input class="sb-search-input" placeholder="Enter your search term..." type="text" value="" name="search" id="search">
+							<input class="sb-search-submit" type="submit" value="">
+							<span class="sb-icon-search"></span>
+						</form>
+					</div>
+
+</body>
+</html>

@@ -1,16 +1,48 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta http-equiv="Conent-Type" content="text/html; charset=UTF-8">
-<script src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"/>
+<script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
 <title>tax</title>
 <style type="text/css">
+body {
+	background: #f2f2f2;
+}
 ul.nav{
 
 }
-ul.nav li{
+ul.nav li {
 	display: block;
-	//display: inline-block;
+	/*display: inline-block;*/
+}
+ul.nav li .item_title {
+	width: 20%;
+	text-align: center;
+	color: white;
+	background-color: green;
+	padding: 6px;
+	border-radius: 5px;
+	margin: 0;
+}
+ul.nav input[type=text] {
+	margin: 3px 0;
+	padding: 10px;
+	width: 80%;
+	border-radius: 5px;
+	height: 18px;
+	font-size: 120%;
+	margin-bottom: 10px;
+	border: 1px solid #ccc;
+}
+ul.nav .calc {
+	padding: 10px 40px;
+	border-radius: 10px;
+	color: #FFF;
+	text-decoration: none;
+	background-color: #03a3fc;
+	border-bottom: 5px solid #2980B9;
+	text-shadow: 0px -2px #2980B9;	
 }
 </style>
 </head>
@@ -18,29 +50,95 @@ ul.nav li{
 
 <ul class="nav">
 	<li>
-		<span class="item_title">項目1</span>
-		<span><input type="text" id="income"></span>
+		<div class="item_title">項目1</div>
+		<div><input type="text" id="income"></div>
 	</li>
 	<li>
-		<span class="item_title">項目2</span>
-		<span><input type="text" id="deduction"></span>
+		<div class="item_title">項目2</div>
+		<div><input type="text" id="deduction"></div>
 	</li>
 	<li>
-		<span class="sub_item_title">社会保険</span>
-		<span><input type="text" id="public_insurance"></span>
+		<div class="item_title">項目3</div>
+		<div><input type="text" id="public_insurance" placeholder="0"></div>
 	</li>
 	<li>
-		<span class="sub_item_title">項目4</span>
-		<span><input type="text" id="life_insurance"></span>
+		<div class="item_title">項目4</div>
+		<div><input type="text" id="life_insurance" placeholder="0"></div>
 	</li>
 	<li>
-		<span class="sub_item_title">項目3</span>
-		<span><input type="text" id="support"></span>
+		<div class="item_title">項目5</div>
+		<div><input type="text" id="support"></div>
+	</li>
+	<li style="margin-left: -10px;">
+		qwe
+	</li>
+	<li id="income_tax">
+	</li>
+	<li style="text-align: center;">
+		<a class="calc">Calc</a>
 	</li>
 </ul>
 
 <script type="text/javascript">
-	$
+$(".nav").on("click", ".calc", function(){
+	var income = $("#income").val();
+	
+	// 給与所得控除
+	var deducation = 650000;
+	if(income <= 1800000) {
+		deducation = (income * 0.4 > 650000) ? income * 0.4 : 650000;
+	} else if (income > 1800000 && income <= 3600000) {
+		deducation = income * 0.3 + 180000;
+	} else if (income > 3600000 && income <= 6600000) {
+		deducation = income * 0.2 + 540000;
+	} else if (income > 6600000 && income < 10000000) {
+		deducation = income * 0.1 + 1200000;
+	} else {
+		deducation = 2200000;
+	}
+
+	console.log("deducation=" + deducation);
+
+	// 基本控除
+	var base_deducation = 380000;
+
+	var income_tax_base = income - deducation - base_deducation;
+
+	var public_insurance = $("#public_insurance").val();
+	public_insurance = (public_insurance.length < 1) ? 0 :  public_insurance;
+	var life_insurance = $("#life_insurance").val();
+	life_insurance = (life_insurance < 1) ? 0 : life_insurance;
+
+	income_tax_base = income_tax_base - public_insurance - life_insurance;
+	income_tax_base = (income_tax_base < 0) ? 0 : income_tax_base;
+	console.log("income_tax_base=" + income_tax_base);
+
+	// 所得税
+	var income_tax;
+
+	if (income_tax_base <= 1950000) {
+		income_tax = income_tax_base * 0.05;
+	} else if (income_tax_base > 1950000 && income_tax_base <= 3300000) {
+		income_tax = income_tax_base * 0.1 - 97500;
+	} else if (income_tax_base > 3300000 && income_tax_base <= 6950000) {
+		income_tax = income_tax_base * 0.2 - 427500;
+	} else if (income_tax_base > 6950000 && income_tax_base <= 9000000) {
+		income_tax = income_tax_base * 0.23 - 636000;
+	} else if (income_tax_base > 9000000 && income_tax_base <= 18000000) {
+		income_tax = income_tax_base * 0.33 - 1536000; 
+	} else if (income_tax_base > 18000000 && income_tax_base <= 40000000) {
+		income_tax = income_tax_base * 0.4 - 2796000;
+	} else if (income_tax_base > 40000000) {
+		income_tax = income_tax_base * 0.45 - 4796000;
+	}
+
+	console.log("income_tax=" + income_tax);
+
+	// 住民税
+	var resident_tax;
+
+
+});
 </script>
 </body>
 </html>

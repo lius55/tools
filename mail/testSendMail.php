@@ -6,7 +6,7 @@
 // debug用、一旦コメントアウト
 // ini_set( 'display_errors', 1 );
 
-require 'PHPMailer/PHPMailerAutoload.php';
+require_once 'PHPMailer/PHPMailerAutoload.php';
 
 /**
  * $subject メールタイトル

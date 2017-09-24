@@ -1,10 +1,18 @@
 <?php
-// http://php-archive.net/php/dom-scraping/
+/**
+ * 楽天店舗スクレイピングプログラム
+ * 参考サイト：http://php-archive.net/php/dom-scraping/
+ */
+
+// エラーのみ表示する
 error_reporting(E_ERROR);
+// タイムアウトさせない
 set_time_limit(0);
 
 /**
  * HTMLとして取り出す
+ * @param node
+ * @return htmlをstringで返却
  */
 function getInnerHtml($node) {
     $children = $node->childNodes;
@@ -17,6 +25,8 @@ function getInnerHtml($node) {
 
 /**
  * curlでhtmlコンテンツ取得
+ * @param url
+ * @return dom
  */
 function getUrlHtml($url) {
 
@@ -143,6 +153,11 @@ function getCateDetail($url, $cate_name) {
 
 	$xpath = getXpath($url);
 
+	$cate_id = array();
+	preg_match("/tz[\d]+/", $url, $cate_id);
+	$cate_id = str_replace('tz', '',$cate_id[0]);
+	// echo "cate_id:{$cate_id}<br>";
+
 	// 総件数取得
 	$num = getInnerHtml($xpath->query('//body/table[7]/tr[1]/td[2]/table[2]/tr[1]/td[2]/table[3]/tr
 		[1]/td[1]/font[1]')->item(0));
@@ -162,7 +177,7 @@ function getCateDetail($url, $cate_name) {
 
 	for ($page = 1; $page <= $page_num; $page++) {
 
-		$cate_url = "https://directory.rakuten.co.jp/rms/sd/directory/vc?s=19&tz=100371&v=2&f=0&p={$page}&o=35&oid=000&k=0&a=0";
+		$cate_url = "https://directory.rakuten.co.jp/rms/sd/directory/vc?s=19&tz={$cate_id}&v=2&f=0&p={$page}&o=35&oid=000&k=0&a=0";
 		$xpath = getXpath($cate_url);
 		
 		$section = array();
@@ -200,6 +215,7 @@ function getCateDetail($url, $cate_name) {
 		flush();
 	// 	// ob_flush();
 		outPutCsv($section, $file_name);
+		echo "{$page}ページ目処理終了.<br>";
 	}
 
 }
@@ -207,10 +223,54 @@ function getCateDetail($url, $cate_name) {
 // --------------------------
 //          処理開始
 // --------------------------
+$processed = array();
+$processed[] = 'レディースファッション';
+$processed[] = 'メンズファッション';
+$processed[] = '靴';
+$processed[] = 'バッグ･小物ブランド･雑貨';
+$processed[] = 'ジュエリー･アクセサリー';
+$processed[] = '腕時計';
+$processed[] = 'インナー･下着･ナイトウエア';
+$processed[] = '食品';
+$processed[] = 'スイーツ･お菓子';
+$processed[] = '水･ソフトドリンク';
+$processed[] = '日本酒･焼酎';
+$processed[] = 'ビール･洋酒';
+$processed[] = 'インテリア･寝具･収納';
+$processed[] = 'キッチン用品･食器･調理器具';
+$processed[] = '日用品雑貨･文房具･手芸';
+$processed[] = 'パソコン･周辺機器';
+$processed[] = '家電';
+$processed[] = 'TV･オーディオ･カメラ';
+$processed[] = 'スマートフォン･タブレット';
+$processed[] = 'ダイエット･健康';
+$processed[] = '医薬品･コンタクト･介護';
+$processed[] = 'スポーツ･アウトドア';
+$processed[] = '美容･コスメ･香水';
+$processed[] = 'おもちゃ･ホビー･ゲーム';
+$processed[] = 'CD･DVD･楽器';
+$processed[] = 'デジタルコンテンツ';
+$processed[] = '花･ガーデン･DIY';
+$processed[] = '車･バイク';
+$processed[] = '車用品･バイク用品';
+$processed[] = 'キッズ･ベビー･マタニティ';
+$processed[] = '本･雑誌･コミック';
+$processed[] = '学び･サービス･保険';
+$processed[] = '旅行･出張･チケット';
+$processed[] = '百貨店･総合通販･ギフト';
+
+// 店舗トップページ
 $xpath = getXpath("https://www.rakuten.co.jp/shop/");
+// ジャンル取得
 $cates = $xpath->query('//*[@id="onScript"]/ul/li');
 foreach ($cates as $cate) {
+
 	echo "{$cate->nodeValue},{$cate->getElementsByTagName('a')->item(0)->getAttribute('href')}";
+
+	if (preg_match("/{$cate->nodeValue}+/", join(",", $processed)) == 1) { 
+		echo "スクレイピング完了のためスキップ致します。<br>";
+		continue; 
+	}
 
 	$cate_url = str_replace('http://', 'https://', $cate->getElementsByTagName('a')->item(0)->getAttribute('href'));
 	getCateDetail($cate_url, $cate->nodeValue);

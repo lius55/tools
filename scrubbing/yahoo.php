@@ -76,17 +76,14 @@ function getCompanyInfo($url) {
 	// 会社名
 	$company_name = 
 		getInnerHtml($xpath->query('//*[@id="CentInfoPage1"]/div[1]/div[1]/table[1]/tr[1]/td[1]')->item(0));
-	if (strlen($company_name) < 1) {
-		$company_name = 
-			getInnerHtml($xpath->query('//*[@id="contents"]/div/dl[1]/dt[1]')->item(0));
-		$company_name = str_replace("ストア名：", "", $company_name);
-	}
 
 	// 問い合わせ窓口
 	$inquiry = getInnerHtml($xpath->query('//*[@id="CentInfoPage1"]/div[3]/div[1]/table[1]/tr[1]/td[1]')->item(0));
 
 	// 郵便番号
 	$post_cd = getInnerHtml($xpath->query('//*[@id="CentInfoPage1"]/div[3]/div[1]/table[1]/tr[2]/td[1]')->item(0));
+	$post_cd = str_replace("〒", '', $post_cd);
+	$post_cd = str_replace("-", '', $post_cd);
 
 	// 住所
 	$address = getInnerHtml($xpath->query('//*[@id="CentInfoPage1"]/div[3]/div[1]/table[1]/tr[3]/td[1]')->item(0));
@@ -94,14 +91,55 @@ function getCompanyInfo($url) {
 	// 電話番号
 	$tel = getInnerHtml($xpath->query('//*[@id="CentInfoPage1"]/div[3]/div[1]/table[1]/tr[4]/td[1]')->item(0));
 
-	// FAX
-	$fax = getInnerHtml($xpath->query('//*[@id="CentInfoPage1"]/div[3]/div[1]/table[1]/tr[5]/td[1]')->item(0));
+	$temp_str = getInnerHtml($xpath->query('//*[@id="CentInfoPage1"]/div[3]/div[1]/table[1]/tr[5]/th[1]')->item(0));
 
-	// email
-	$email = getInnerHtml($xpath->query('//*[@id="CentInfoPage1"]/div[3]/div[1]/table[1]/tr[6]/td[1]')->item(0));
+	// FAX 、email
+	if (strpos($temp_str, 'ファックス番号') === false) {
+		$fax = '';
+		$email = getInnerHtml($xpath->query('//*[@id="CentInfoPage1"]/div[3]/div[1]/table[1]/tr[5]/td[1]')->item(0));
+	} else {
+		$fax = getInnerHtml($xpath->query('//*[@id="CentInfoPage1"]/div[3]/div[1]/table[1]/tr[5]/td[1]')->item(0));
+		$email = getInnerHtml($xpath->query('//*[@id="CentInfoPage1"]/div[3]/div[1]/table[1]/tr[6]/td[1]')->item(0));
+	}
+
+	if (strlen($company_name) < 1) {
+		// 会社名
+		$company_name = 
+			getInnerHtml($xpath->query('//*[@id="contents"]/div/dl[1]/dt[1]')->item(0));
+		$company_name = str_replace("ストア名：", "", $company_name);
+
+		$comp_info = getInnerHtml($xpath->query('//*[@id="contents"]/div[1]/dl[1]/dd[6]')->item(0));
+
+		// 事業責任者
+		$result_ary = array();
+		preg_match('/事業責任者: [^<]+/', $comp_info, $result_ary);
+		$inquiry = str_replace('事業責任者:', '', $result_ary[0]);
+
+		// 郵便番号
+		preg_match('/郵便番号: [^<]+/', $comp_info, $result_ary);
+		$post_cd = str_replace('郵便番号:', '', $result_ary[0]);
+
+		// 都道府県
+		preg_match('/都道府県: [^<]+/', $comp_info, $result_ary);
+		$address = str_replace('都道府県: ', '', $result_ary[0]);
+		preg_match('/市区町村: [^<]+/', $comp_info, $result_ary);
+		$address .= str_replace('市区町村: ', '', $result_ary[0]);
+		preg_match('/番地・号: [^<]+/', $comp_info, $result_ary);
+		$address .= str_replace('番地・号: ', '', $result_ary[0]);
+		preg_match('/ビル名・室番号: [^<]+/', $comp_info, $result_ary);
+		$address .= str_replace('ビル名・室番号: ', '', $result_ary[0]);
+
+		// 電話番号
+		preg_match('/電話番号: [^<]+/', $comp_info, $result_ary);
+		$tel = str_replace('電話番号: ', '', $result_ary[0]);
+
+		// メールアドレス
+		preg_match('/メールアドレス: [^<]+/', $comp_info, $result_ary);
+		$email = str_replace('メールアドレス: ', '', $result_ary[0]);
+	}
 
 	$ret_ary = array($company_name, $inquiry, $post_cd, $address, $tel, $fax, $email); 
-	echo "ret_Ary:" . join(',', $ret_ary);
+	// echo "ret_ary:" . join(',', $ret_ary);
 	return $ret_ary;
 }
 
@@ -141,6 +179,7 @@ function getCateDetail($url, $cate_name) {
 
 		$start = ($page-1)*50; 
 		$cate_url = $url . "?b={$start}";
+		echo $cate_url;
 		$xpath = getXpath($cate_url);
 		
 		$section = array();
@@ -157,17 +196,19 @@ function getCateDetail($url, $cate_name) {
 
 			// 点数、評価数
 			$score = getInnerHtml($node->getElementsByTagName("a")->item(1)->getElementsByTagName("span")->item(6));
-			$score .= getInnerHtml($node->getElementsByTagName("a")->item(1)->getElementsByTagName("span")->item(7));
+			$score = str_replace('点', '', $score);
+			$score_num = getInnerHtml($node->getElementsByTagName("a")->item(1)->getElementsByTagName("span")->item(7));
+			$score_num = preg_replace('/[^\d]+/', '', $score_num);
 
 			// 会社情報
-			$line = array_merge(array($shop_name, $shop_url, $score), getCompanyInfo($shop_url . "info.html"));
+			$line = array_merge(array($cate_name,$shop_name, $shop_url, $score, $score_num), getCompanyInfo($shop_url . "info.html"));
 			$section[] = $line;
 			// echo "line:" . join(',', $line) . "<br>";
 		}
 
 		flush();
 		outPutCsv($section, $file_name);
-		echo "{$page}ページ目処理終了.<br>";
+		echo "[{$page}ページ目処理終了.]<br>";
 	}
 
 }
@@ -176,49 +217,49 @@ function getCateDetail($url, $cate_name) {
 //          処理開始
 // --------------------------
 $processed = array();
-$processed[] = 'ファッション';
-$processed[] = '食品';
-$processed[] = 'アウトドア、釣り、旅行用品';
-$processed[] = 'ダイエット、健康';
-$processed[] = 'コスメ、美容、ヘアケア';
-$processed[] = 'スマホ、タブレット、パソコン';
-$processed[] = 'テレビ、オーディオ、カメラ';
-$processed[] = '家電';
-$processed[] = '家具、インテリア';
-$processed[] = '花、ガーデニング';
-$processed[] = 'キッチン、日用品、文具';
-$processed[] = 'DIY、工具';
-$processed[] = 'ペット用品、生き物';
-$processed[] = '楽器、手芸、コレクション';
-$processed[] = 'ゲーム、おもちゃ';
-$processed[] = 'ベビー、キッズ、マタニティ';
-$processed[] = 'スポーツ';
-$processed[] = '車、バイク、自転車';
-$processed[] = 'CD、音楽ソフト、チケット';
-$processed[] = 'DVD、映像ソフト';
-$processed[] = '本、雑誌、コミック';
+// $processed[] = 'ファッション';
+// $processed[] = '食品';
+// $processed[] = 'アウトドア、釣り、旅行用品';
+// $processed[] = 'ダイエット、健康';
+// $processed[] = 'コスメ、美容、ヘアケア';
+// $processed[] = 'スマホ、タブレット、パソコン';
+// $processed[] = 'テレビ、オーディオ、カメラ';
+// $processed[] = '家電';
+// $processed[] = '家具、インテリア';
+// $processed[] = '花、ガーデニング';
+// $processed[] = 'キッチン、日用品、文具';
+// $processed[] = 'DIY、工具';
+// $processed[] = 'ペット用品、生き物';
+// $processed[] = '楽器、手芸、コレクション';
+// $processed[] = 'ゲーム、おもちゃ';
+// $processed[] = 'ベビー、キッズ、マタニティ';
+// $processed[] = 'スポーツ';
+// $processed[] = '車、バイク、自転車';
+// $processed[] = 'CD、音楽ソフト、チケット';
+// $processed[] = 'DVD、映像ソフト';
+// $processed[] = '本、雑誌、コミック';
 $processed[] = 'レンタル、各種サービス';
 
-// // 店舗トップページ
-// $xpath = getXpath("https://shopping.yahoo.co.jp/stores/");
-// // ジャンル取得
-// $cates = $xpath->query('//*[@id="shpMain"]/div[1]/div[1]/div[1]/div[1]/div[1]/div[1]/dl[1]/dd[1]/ul/li');
+// 店舗トップページ
+$xpath = getXpath("https://shopping.yahoo.co.jp/stores/");
+// ジャンル取得
+$cates = $xpath->query('//*[@id="shpMain"]/div[1]/div[1]/div[1]/div[1]/div[1]/div[1]/dl[1]/dd[1]/ul/li');
 
-// foreach ($cates as $cate) {
+foreach ($cates as $cate) {
 
-// 	$cate_url = $cate->getElementsByTagName('a')->item(0)->getAttribute('href');
-// 	echo "{$cate->nodeValue},{$cate_url}<br>";
+	$cate_url = $cate->getElementsByTagName('a')->item(0)->getAttribute('href');
+	echo "{$cate->nodeValue},{$cate_url}<br>";
 	
-// // 	if (preg_match("/{$cate->nodeValue}+/", join(",", $processed)) == 1) { 
-// // 		echo "スクレイピング完了のためスキップ致します。<br>";
-// // 		continue; 
-// // 	}
+	if (preg_match("/{$cate->nodeValue}+/", join(",", $processed)) == 1) { 
+		echo "スクレイピング完了のためスキップ致します。<br>";
+		continue; 
+	}
 
-// 	getCateDetail($cate_url, $cate->nodeValue);
-// }
+	getCateDetail($cate_url, $cate->nodeValue);
+}
 
 // getCompanyInfo("https://store.shopping.yahoo.co.jp/aaa01dia/info.html");
-getCompanyInfo("https://store.shopping.yahoo.co.jp/arch38/info.html");
+// getCompanyInfo("https://store.shopping.yahoo.co.jp/arch38/info.html");
 
 // getCateDetail("https://shopping.yahoo.co.jp/category/13457/stores/", "test");
 ?>

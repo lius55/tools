@@ -170,6 +170,13 @@ function getCateDetail($url, $cate_name) {
 	$page_num = ceil($shop_num/50);
 
 	echo "[店舗件数：{$shop_num},ページ数：{$page_num}]<br>";
+	// 手作業フラッグ
+	if ($shop_num > 1000) {
+		echo "手作業必要!!";
+		return;
+	} else if($shop_num == 0){
+		return;
+	}
 
 	// file作成
 	$file_name = "yahoo/{$cate_name}.csv";
@@ -217,49 +224,74 @@ function getCateDetail($url, $cate_name) {
 //          処理開始
 // --------------------------
 $processed = array();
-// $processed[] = 'ファッション';
-// $processed[] = '食品';
-// $processed[] = 'アウトドア、釣り、旅行用品';
-// $processed[] = 'ダイエット、健康';
-// $processed[] = 'コスメ、美容、ヘアケア';
-// $processed[] = 'スマホ、タブレット、パソコン';
-// $processed[] = 'テレビ、オーディオ、カメラ';
-// $processed[] = '家電';
-// $processed[] = '家具、インテリア';
-// $processed[] = '花、ガーデニング';
-// $processed[] = 'キッチン、日用品、文具';
-// $processed[] = 'DIY、工具';
-// $processed[] = 'ペット用品、生き物';
-// $processed[] = '楽器、手芸、コレクション';
-// $processed[] = 'ゲーム、おもちゃ';
-// $processed[] = 'ベビー、キッズ、マタニティ';
-// $processed[] = 'スポーツ';
-// $processed[] = '車、バイク、自転車';
-// $processed[] = 'CD、音楽ソフト、チケット';
-// $processed[] = 'DVD、映像ソフト';
-// $processed[] = '本、雑誌、コミック';
-$processed[] = 'レンタル、各種サービス';
+// $processed[] = 'ファッション'; // 21,775
+// $processed[] = '食品'; // 12,276
+// $processed[] = 'アウトドア、釣り、旅行用品'; // 3,669
+// $processed[] = 'ダイエット、健康'; // 8,820
+// $processed[] = 'コスメ、美容、ヘアケア'; // 6,302
+// $processed[] = 'スマホ、タブレット、パソコン'; // 6,040
+// $processed[] = 'テレビ、オーディオ、カメラ'; // 2,055
+// $processed[] = '家電'; // 2,800
+// $processed[] = '家具、インテリア'; // 9,760
+// $processed[] = '花、ガーデニング'; // 3,585
+// $processed[] = 'キッチン、日用品、文具'; // 15,090
+// $processed[] = 'DIY、工具'; // 6,824
+// $processed[] = 'ペット用品、生き物'; // 2,609
+// $processed[] = '楽器、手芸、コレクション'; // 6,641
+// $processed[] = 'ゲーム、おもちゃ'; // 5,110
+// $processed[] = 'ベビー、キッズ、マタニティ'; // 6,657
+// $processed[] = 'スポーツ'; // 4,418
+// $processed[] = '車、バイク、自転車'; // 5,282
+// $processed[] = 'CD、音楽ソフト、チケット'; // 870
+// $processed[] = 'DVD、映像ソフト'; // 841
+// $processed[] = '本、雑誌、コミック'; // 2,116
+// $processed[] = 'レンタル、各種サービス';
 
 // 店舗トップページ
-$xpath = getXpath("https://shopping.yahoo.co.jp/stores/");
-// ジャンル取得
-$cates = $xpath->query('//*[@id="shpMain"]/div[1]/div[1]/div[1]/div[1]/div[1]/div[1]/dl[1]/dd[1]/ul/li');
+// $xpath = getXpath("https://shopping.yahoo.co.jp/stores/");
+// // ジャンル取得
+// $cates = $xpath->query('//*[@id="shpMain"]/div[1]/div[1]/div[1]/div[1]/div[1]/div[1]/dl[1]/dd[1]/ul/li');
 
-foreach ($cates as $cate) {
+// foreach ($cates as $cate) {
 
-	$cate_url = $cate->getElementsByTagName('a')->item(0)->getAttribute('href');
-	echo "{$cate->nodeValue},{$cate_url}<br>";
+// 	$cate_url = $cate->getElementsByTagName('a')->item(0)->getAttribute('href');
+// 	echo "{$cate->nodeValue},{$cate_url}<br>";
 	
-	if (preg_match("/{$cate->nodeValue}+/", join(",", $processed)) == 1) { 
-		echo "スクレイピング完了のためスキップ致します。<br>";
-		continue; 
-	}
+// 	if (preg_match("/{$cate->nodeValue}+/", join(",", $processed)) == 1) { 
+// 		echo "スクレイピング完了のためスキップ致します。<br>";
+// 		continue; 
+// 	}
 
-	getCateDetail($cate_url, $cate->nodeValue);
-}
+// 	$xpath = getXpath($cate_url);
+
+// 	// 総件数取得
+// 	$num = getInnerHtml($xpath->query('//*[@id="shpMain"]/div[1]/div[1]/div[1]/div[1]/div[1]/div[1]/dl[1]/dd[1]/em[1]')->item(0));
+
+// 	$shop_num = (int)str_replace(",", "", $num);
+// 	// echo "{$shop_num}";
+// 	if ($shop_num <= 1000) {
+// 		getCateDetail($cate_url, $cate->nodeValue);
+// 	} else {
+// 		$start_char = $xpath->query('//*[@id="shpMain"]/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[3]/div[2]/div[1]/dl[1]/dd/ul/li');
+
+// 		foreach ($start_char as $char) {
+// 			$char_url = $char->getElementsByTagName('a')->item(0)->getAttribute("href");
+// 			echo "{$char_url}<br>";
+// 			// getCateDetail($char_url, $cate->nodeValue);
+// 			continu;
+// 		}
+// 	}
+// }
 
 // getCompanyInfo("https://store.shopping.yahoo.co.jp/aaa01dia/info.html");
 // getCompanyInfo("https://store.shopping.yahoo.co.jp/arch38/info.html");
 
-// getCateDetail("https://shopping.yahoo.co.jp/category/13457/stores/", "test");
+// getCateDetail("https://shopping.yahoo.co.jp/category/13457/2494/stores/alphabet/S/", "ファッション");
+// getCateDetail("https://shopping.yahoo.co.jp/category/13457/2495/stores/alphabet/S/", "ファッション");
+// getCateDetail("https://shopping.yahoo.co.jp/category/13457/2496/stores/alphabet/S/", "ファッション");
+
+getCateDetail("https://shopping.yahoo.co.jp/category/13457/2494/stores/kana/ha/", "ファッション");
+getCateDetail("https://shopping.yahoo.co.jp/category/13457/2495/stores/kana/ha/", "ファッション");
+getCateDetail("https://shopping.yahoo.co.jp/category/13457/2496/stores/kana/ha/", "ファッション");
+
 ?>

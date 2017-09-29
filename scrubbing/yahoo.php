@@ -1,6 +1,6 @@
 <?php
 /**
- * 楽天店舗スクレイピングプログラム
+ * ヤフー店舗スクレイピングプログラム
  * 参考サイト：http://php-archive.net/php/dom-scraping/
  */
 

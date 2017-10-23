@@ -1,0 +1,42 @@
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>megapix-image.js test</title>
+    <meta charset="utf-8">
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+<script type="text/javascript" src="jquery.exif.js"></script>	
+	<script src="megapix-image.js"></script>
+	<script>
+
+window.onload = function() {
+  var fileInput = document.getElementById('fileInput');
+  fileInput.onchange = function() {
+    var file = fileInput.files[0];
+    var mpImg = new MegaPixImage(file);
+    mpImg.render(document.getElementById('resultImage'), { maxWidth: 600, maxHeight: 600, quality: 1 });
+    mpImg.render(document.getElementById('resultCanvas'), { maxWidth: 960, maxHeight: 960, quality: 0.1 });
+  }
+};
+	</script>
+	</head>
+  <body>
+    Select MegaPixel Photo: <input type="file" id="fileInput">
+    <br/>
+    Image: <br/>
+    <img id="resultImage" exif="true">
+    <br/>
+    Canvas:<br/>
+	<canvas id="resultCanvas">
+	
+<script type="text/javascript">
+<!--
+  $("#resultImage").click(function() {
+  document.getElementById("ei").innerHTML = $(this).exifPretty();
+  });
+// -->
+</script>
+ <div id="ei"></div>
+	
+  </body>
+</html>

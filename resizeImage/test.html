@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>TEST</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+	<script src="megapix-image.js"></script>
+</head>
+
+<body>
+
+<form id="imageForm">
+<input type="file" id="fileInput" name="fileInput" />
+<canvas id="compCanvas" style="display: none;"></canvas>
+</form>
+
+<button id="upload">Upload</button>
+
+<script type="text/javascript">
+$(function() {
+
+const max_image_size = 512000;
+
+	var base64ToBlob = function(base64, extention){
+		var base64Data = base64.split(',')[1], // Data URLからBase64のデータ部分のみを取得
+			data = window.atob(base64Data), // base64形式の文字列をデコード
+			buff = new ArrayBuffer(data.length),
+			arr = new Uint8Array(buff),
+			blob, i, dataLen;
+		
+		// blobの生成
+		for( i = 0, dataLen = data.length; i < dataLen; i++){
+			arr[i] = data.charCodeAt(i);
+		}
+		blob = new Blob([arr], {type: 'image/' + extention});
+		return blob;
+	}
+
+	var imageToBase64 = function(img, extention) {
+	    // New Canvas
+	    var canvas = document.createElement('canvas');
+	    canvas.width  = img.width;
+	    canvas.height = img.height;
+	    // Draw Image
+	    var ctx = canvas.getContext('2d');
+	    ctx.drawImage(img, 0, 0);
+	    // To Base64
+	    return canvas.toDataURL('image/' + extention);
+	}
+
+	var imageToBlob = function(img, extention) {
+		return base64ToBlob(imageToBase64(img, extention), extention);
+	}
+
+	var loadImage = function(fileData, img, extention) {
+
+		var getImgDataUrl = function(canvas, img) {
+			var dataUrl = canvas[0].toDataURL("image/" + extention);
+			var blob = base64ToBlob(dataUrl, extention);
+			if (blob["size"] > max_image_size) {
+				var resize = Math.sqrt(blob["size"] / max_image_size);
+				resize = (resize < Math.sqrt(2)) ? Math.sqrt(2) : resize;
+				var width = canvas.attr("width") / resize;
+				var height = canvas.attr("height") / resize;
+				canvas.attr("width", width);
+			    canvas.attr("height", height);
+	            canvas[0].getContext("2d").drawImage(img, 0, 0, width, height);
+	            return getImgDataUrl(canvas, img);
+			} else {
+				return dataUrl;
+			}
+		};
+
+		var reader = new FileReader();
+		reader.readAsDataURL(fileData, 'utf-8');
+
+		reader.onload = function(evt){
+			
+			var resultArray = evt.target.result.split(',');
+			if (resultArray[0] == "data:base64") {
+				// コンテンツタイプが無いと img.onload 呼ばれなかったので追加
+				resultArray[0] = "data:image/" + extention + ";base64";
+			}
+
+			var data = resultArray.join(',');
+			var tempImg = new Image();
+			tempImg.src = data;
+			tempImg.onload = function() {
+
+				var canvas = $("#compCanvas");
+				var ctx = canvas[0].getContext("2d");
+				$("#compCanvas").attr("width", tempImg.width);
+	            $("#compCanvas").attr("height", tempImg.height);
+	            ctx.drawImage(tempImg, 0, 0, tempImg.width, tempImg.height);
+	            
+     			img.src = getImgDataUrl(canvas, tempImg);
+			}
+		}
+	}
+
+	var uploadSuccess = function(response) {
+	    alert("success");
+	}
+
+	var upload = function(uploadBlob) {
+		var fd = new FormData();
+		fd.append("img", uploadBlob);
+
+	    $.ajax({
+	        url: '/estate/manager/test.php',
+	        type: 'post',
+	        processData: false,
+	        contentType: false,
+	        data: fd,
+	        dataType: "json",
+	        success: uploadSuccess,
+	        error: function(XMLHttpRequest, textStatus, errorThrown) {
+	            alert(errorThrown);
+	        }
+	    });	
+	};
+
+	$("#upload").on("click", function() {
+
+		var fileData = document.getElementById("fileInput").files;
+		// TODO 拡張子取得
+		var extention = "jpg";
+
+		var img = new Image();
+		img.onload = function() {
+			upload(imageToBlob(img, extention));
+		}
+		// load image
+		loadImage(fileData[0], img);
+	});
+
+});
+</script>
+
+</body>
+
+</html>
